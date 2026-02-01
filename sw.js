@@ -1,34 +1,29 @@
-// sw.js - Versão Reforçada para GlicoGabi
+// sw.js - Código Completo e Reforçado
 self.addEventListener('install', (e) => {
-    self.skipWaiting(); // Força a atualização imediata do app
+    self.skipWaiting(); 
 });
 
 self.addEventListener('activate', (e) => {
-    return self.clients.claim();
+    e.waitUntil(self.clients.claim());
 });
 
-// Essa função é o que faz o "barulho" e a vibração
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
-    event.waitUntil(
-        clients.openWindow('/')
-    );
+    event.waitUntil(clients.openWindow('/'));
 });
 
-// O motor que monitora o tempo
-self.addEventListener('push', (event) => {
-    const options = {
-        body: 'GlicoGabi: Hora da sua medicação/insulina!',
-        icon: 'icon-512.png',
-        badge: 'icon-512.png',
-        vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40], // Vibração tipo alarme
-        tag: 'glicogabi-alarme',
-        renotify: true,
-        requireInteraction: true, // A notificação não some até você clicar
-        data: { dateOfArrival: Date.now() }
-    };
-
-    event.waitUntil(
-        self.registration.showNotification('⚠️ HORA DO REMÉDIO', options)
-    );
+// ESCUTA O COMANDO DO INDEX.HTML
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'DISPARAR_ALARME') {
+        const options = {
+            body: event.data.body,
+            icon: 'icon-512.png', // Usando o nome correto que você já arrumou
+            badge: 'icon-512.png',
+            vibrate: [500, 110, 500, 110, 450, 110, 200, 110], 
+            tag: 'glicogabi-alarme',
+            renotify: true,
+            requireInteraction: true
+        };
+        self.registration.showNotification(event.data.title, options);
+    }
 });
