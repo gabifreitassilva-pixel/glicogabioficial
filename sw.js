@@ -1,21 +1,34 @@
-// sw.js - Service Worker para GlicoGabi
+// sw.js - Versão Reforçada para GlicoGabi
 self.addEventListener('install', (e) => {
-    console.log('GlicoGabi: Service Worker Instalado');
+    self.skipWaiting(); // Força a atualização imediata do app
 });
 
+self.addEventListener('activate', (e) => {
+    return self.clients.claim();
+});
+
+// Essa função é o que faz o "barulho" e a vibração
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow('/')
+    );
+});
+
+// O motor que monitora o tempo
 self.addEventListener('push', (event) => {
-    const data = event.data.json();
-    self.registration.showNotification(data.title, {
-        body: data.body,
+    const options = {
+        body: 'GlicoGabi: Hora da sua medicação/insulina!',
         icon: 'icon-512.png',
         badge: 'icon-512.png',
-        vibrate: [200, 100, 200]
-    });
-});
+        vibrate: [500, 110, 500, 110, 450, 110, 200, 110, 170, 40, 450, 110, 200, 110, 170, 40], // Vibração tipo alarme
+        tag: 'glicogabi-alarme',
+        renotify: true,
+        requireInteraction: true, // A notificação não some até você clicar
+        data: { dateOfArrival: Date.now() }
+    };
 
-// Lógica para verificar lembretes locais em segundo plano
-setInterval(() => {
-    // Nota: Navegadores restringem intervalos longos com app fechado por economia de bateria.
-    // O ideal para uso profissional é usar uma API de Push, mas para uso pessoal 
-    // manter o app em suspensão já ajuda.
-}, 60000);
+    event.waitUntil(
+        self.registration.showNotification('⚠️ HORA DO REMÉDIO', options)
+    );
+});
