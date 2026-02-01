@@ -162,12 +162,6 @@
 <script>
     let registros = {}; let marcos = []; let lembretes = [];
 
-    // Registrar o Service Worker para notificações com app fechado
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-        .then(() => console.log("GlicoGabi: Service Worker Ativo"));
-    }
-
     window.onload = function() {
         const d = localStorage.getItem('glicogabi-v35'); if(d) registros = JSON.parse(d);
         const m = localStorage.getItem('glicogabi-marcos'); if(m) marcos = JSON.parse(m);
@@ -182,8 +176,13 @@
         });
         sinc(); renderHome(); 
         
-        // Verifica lembretes a cada minuto
-        setInterval(verificarLembretes, 60000);
+        // Registro do Service Worker e início do monitoramento
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(() => {
+                console.log("GlicoGabi: Sistema de Alarme Ativo!");
+                setInterval(verificarLembretes, 60000); // Começa a verificar após registro
+            });
+        }
     };
 
     function salvarZapNum() { localStorage.setItem('glicogabi-telzap', document.getElementById('tel-zap').value); }
@@ -202,21 +201,20 @@
         localStorage.setItem('glicogabi-lembretes', JSON.stringify(lembretes));
     }
 
+    // NOVA FUNÇÃO REFORÇADA: Manda o alarme para o sw.js
     function verificarLembretes() {
         const agora = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
         
         if (lembretes.includes(agora)) {
-            if (Notification.permission === "granted") {
-                navigator.serviceWorker.ready.then(function(registration) {
-                    registration.showNotification("GlicoGabi: Hora da Medicação!", {
-                        body: "Verifique sua glicemia ou tome sua dose agora.",
-                        icon: 'icon-512.png',
-                        vibrate: [200, 100, 200],
-                        tag: 'lembrete-glicogabi'
+            if ('serviceWorker' in navigator && Notification.permission === "granted") {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.active.postMessage({
+                        type: 'DISPARAR_ALARME',
+                        title: '⚠️ GlicoGabi: HORA DO REMÉDIO',
+                        body: 'Agora são ' + agora + '. Não esqueça sua dose!'
                     });
                 });
             } else {
-                // Caso as notificações de sistema estejam bloqueadas
                 alert("⏰ HORA DA MEDICAÇÃO: " + agora);
             }
         }
