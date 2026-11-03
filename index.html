@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Diário Glicêmico e Pressão</title>
+    
+    <!-- Meta tags PWA-like solicitadas -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#9333ea">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Estilos da Tela do Aplicativo */
@@ -445,7 +452,7 @@
             html += `</tbody></table>`;
         }
 
-        html += '<p class="marca">Gerado pelo Meu Diário Glicêmico</p>';
+        html += '<p class="marca">Gerado pelo Meu Diário Glicêmico e Pressão</p>';
         area.innerHTML = html;
         window.print();
     }
